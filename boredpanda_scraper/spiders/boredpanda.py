@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import scrapy
 from scrapy.contrib.linkextractors import LinkExtractor
 from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.http.request import Request
 
-from boredpanda_scraper.items import BoredpandaScraperItem
+from boredpanda_scraper.items import BoredpandaScraperItem, BoredpandaScraperItemLoader
 
 
 class BoredpandaSpider(CrawlSpider):
@@ -12,12 +12,18 @@ class BoredpandaSpider(CrawlSpider):
     start_urls = ['http://www.boredpanda.com/']
 
     rules = (
-        Rule(LinkExtractor(allow=r'Items/'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths=['//article/h2/a[@class="title"]']),
+             callback='parse_item',
+             follow=True),
     )
 
     def parse_item(self, response):
-        i = BoredpandaScraperItem()
-        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
-        #i['name'] = response.xpath('//div[@id="name"]').extract()
-        #i['description'] = response.xpath('//div[@id="description"]').extract()
-        return i
+        l = BoredpandaScraperItemLoader(item=BoredpandaScraperItem(),
+                                        response=response)
+        l.add_xpath('content', '//div[contains(@class, "post-content")]/'
+                               'p[@style="text-align: justify;"]/text()')
+        l.add_xpath('image_urls', '//div[contains(@class, "post-content")]/'
+                                  'descendant::img/@src')
+        l.add_xpath('votes', '//footer//div[@class="points"]/@data-points')
+        l.add_value('url', response.url)
+        return l.load_item()

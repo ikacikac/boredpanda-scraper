@@ -14,4 +14,14 @@ SPIDER_MODULES = ['boredpanda_scraper.spiders']
 NEWSPIDER_MODULE = 'boredpanda_scraper.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'boredpanda_scraper (+http://www.yourdomain.com)'
+USER_AGENT = 'boredpanda_scraper (+http://www.yourdomain.com)'
+
+
+# Enabling CSV exporter
+FEED_EXPORTERS = {
+    'csv': 'boredpanda_scraper.exporters.csvexporter.CSVExporter'
+}
+# Specifying order of fields exported in CSV file.
+EXPORT_FIELDS = ['votes', 'content', 'images', 'image_urls', 'url']
+
+DOWNLOAD_DELAY = 2
